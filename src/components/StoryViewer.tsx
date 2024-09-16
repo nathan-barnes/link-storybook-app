@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Story } from '../types/Story';
+// import { Story } from '../types/Story';
+
+// Define the StoryViewerProps interface
+interface StoryViewerProps {
+    story: {
+      pdfUrl: string;
+      title: string;
+    };
+    onBack: () => void;
+  }
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 
