@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCbA_cpS6EHztzyQftBZifqTOSTeF7JSxA",
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
     authDomain: "barneshome-3dfbb.firebaseapp.com",
     projectId: "barneshome-3dfbb",
     storageBucket: "barneshome-3dfbb.appspot.com",
