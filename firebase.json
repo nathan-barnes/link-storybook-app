@@ -5,7 +5,7 @@
   },
   "hosting": {
     "site": "link-storybook",
-    "public": "public",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
