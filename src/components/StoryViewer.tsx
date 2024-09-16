@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-// import { Story } from '../types/Story';
 
 // Define the StoryViewerProps interface
 interface StoryViewerProps {
-    story: {
-      pdfUrl: string;
-      title: string;
-    };
-    onBack: () => void;
-  }
+  story: {
+    pdfUrl: string;
+    title: string;
+  };
+  onBack: () => void;
+}
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 
@@ -17,15 +16,20 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState<number>(400);
-  const containerRef = useRef<HTMLDivElement>(null); // Reference to the container
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Adjust page width dynamically based on screen height
+  // Adjusts the page width and detect if the screen size is small (mobile)
   useEffect(() => {
     const updatePageWidth = () => {
       const windowHeight = window.innerHeight;
+      const windowWidth = window.innerWidth;
       const maxPageHeight = windowHeight * 0.75;
       const aspectRatio = 1.414;
       setPageWidth(maxPageHeight / aspectRatio);
+
+      // Check if the screen width is below a certain threshold (e.g., 768px for mobile)
+      setIsMobile(windowWidth < 768);
     };
 
     updatePageWidth();
@@ -34,28 +38,24 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
     return () => window.removeEventListener('resize', updatePageWidth);
   }, []);
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-  };
-
-  // Preserve scroll position when navigating between pages
-  const preserveScroll = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = 0; // Reset to top
-    }
+  const onDocumentLoadSuccess = async (pdf: any) => {
+    setNumPages(pdf.numPages);
   };
 
   const goToPrevPage = () => {
-    setPageNumber((prevPage) => Math.max(prevPage - 2, 1));
-    preserveScroll();
+    setPageNumber((prevPage) => Math.max(prevPage - (isMobile ? 1 : 2), 1));
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
   };
 
   const goToNextPage = () => {
-    setPageNumber((prevPage) => Math.min(prevPage + 2, numPages ?? prevPage));
-    preserveScroll();
+    setPageNumber((prevPage) => Math.min(prevPage + (isMobile ? 1 : 2), numPages ?? prevPage));
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
   };
 
-  // Memoize the pages to avoid re-renders
   const memoizedPages = useMemo(
     () => (
       <div className="relative flex justify-center">
@@ -65,7 +65,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
             <p className="text-sm font-minecraft mt-2">Page {pageNumber}</p>
           </div>
         ) : (
-          <div className="flex">
+          <div className={`flex ${isMobile ? 'flex-col' : ''}`}>
             {pageNumber === numPages ? (
               <div className="flex flex-col items-center">
                 <Page pageNumber={pageNumber} width={pageWidth} />
@@ -77,7 +77,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
                   <Page pageNumber={pageNumber} width={pageWidth} />
                   <p className="text-sm font-minecraft mt-2">Page {pageNumber}</p>
                 </div>
-                {numPages !== null && pageNumber + 1 <= numPages && (
+                {!isMobile && numPages !== null && pageNumber + 1 <= numPages && (
                   <div className="flex flex-col items-center">
                     <Page pageNumber={pageNumber + 1} width={pageWidth} />
                     <p className="text-sm font-minecraft mt-2">Page {pageNumber + 1}</p>
@@ -89,7 +89,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
         )}
       </div>
     ),
-    [pageNumber, numPages, pageWidth]
+    [pageNumber, numPages, pageWidth, isMobile]
   );
 
   return (
@@ -101,11 +101,11 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
         Back to Stories
       </button>
 
-      {/* <h1 className="text-4xl font-minecraft text-center mb-4">{story.title}</h1> */}
+      <h1 className="text-4xl font-minecraft text-center mb-4">{story.title}</h1>
 
       <div
         className="bg-white text-black p-4 rounded-lg shadow-lg mb-8 max-h-screen overflow-auto relative"
-        ref={containerRef} // Assign the ref to the container
+        ref={containerRef}
       >
         <Document file={story.pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
           {memoizedPages}

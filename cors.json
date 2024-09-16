@@ -1,7 +1,8 @@
 [
     {
-      "origin": ["https://link-storybook.web.app"],
-      "method": ["GET", "POST"],
-      "maxAgeSeconds": 3600
+        "origin": ["http://localhost:5173", "https://link-storybook.web.app"],
+        "method": ["GET", "POST", "OPTIONS"],
+        "maxAgeSeconds": 3600,
+        "responseHeader": ["Content-Type"]
     }
   ]
