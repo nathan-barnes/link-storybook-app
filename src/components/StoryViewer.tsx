@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Story } from '../types/Story';
 
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 
-interface StoryViewerProps {
-  story: Story;
-  onBack: () => void;
-}
-
 const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState<number>(400);
+  const containerRef = useRef<HTMLDivElement>(null); // Reference to the container
 
+  // Adjust page width dynamically based on screen height
   useEffect(() => {
     const updatePageWidth = () => {
       const windowHeight = window.innerHeight;
@@ -32,8 +29,59 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
     setNumPages(numPages);
   };
 
-  const goToPrevPage = () => setPageNumber(prevPage => Math.max(prevPage - 2, 1));
-  const goToNextPage = () => setPageNumber(prevPage => Math.min(prevPage + 2, numPages ?? prevPage));
+  // Preserve scroll position when navigating between pages
+  const preserveScroll = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0; // Reset to top
+    }
+  };
+
+  const goToPrevPage = () => {
+    setPageNumber((prevPage) => Math.max(prevPage - 2, 1));
+    preserveScroll();
+  };
+
+  const goToNextPage = () => {
+    setPageNumber((prevPage) => Math.min(prevPage + 2, numPages ?? prevPage));
+    preserveScroll();
+  };
+
+  // Memoize the pages to avoid re-renders
+  const memoizedPages = useMemo(
+    () => (
+      <div className="relative flex justify-center">
+        {pageNumber === 1 ? (
+          <div className="flex flex-col items-center">
+            <Page pageNumber={pageNumber} width={pageWidth} />
+            <p className="text-sm font-minecraft mt-2">Page {pageNumber}</p>
+          </div>
+        ) : (
+          <div className="flex">
+            {pageNumber === numPages ? (
+              <div className="flex flex-col items-center">
+                <Page pageNumber={pageNumber} width={pageWidth} />
+                <p className="text-sm font-minecraft mt-2">Page {pageNumber}</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center">
+                  <Page pageNumber={pageNumber} width={pageWidth} />
+                  <p className="text-sm font-minecraft mt-2">Page {pageNumber}</p>
+                </div>
+                {numPages !== null && pageNumber + 1 <= numPages && (
+                  <div className="flex flex-col items-center">
+                    <Page pageNumber={pageNumber + 1} width={pageWidth} />
+                    <p className="text-sm font-minecraft mt-2">Page {pageNumber + 1}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    ),
+    [pageNumber, numPages, pageWidth]
+  );
 
   return (
     <div className="min-h-screen bg-minecraftGreen text-white p-6">
@@ -44,16 +92,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
         Back to Stories
       </button>
 
-      <h1 className="text-4xl font-minecraft text-center mb-4">{story.title}</h1>
+      {/* <h1 className="text-4xl font-minecraft text-center mb-4">{story.title}</h1> */}
 
-      <div className="bg-white text-black p-4 rounded-lg shadow-lg mb-8 max-h-screen overflow-auto">
+      <div
+        className="bg-white text-black p-4 rounded-lg shadow-lg mb-8 max-h-screen overflow-auto relative"
+        ref={containerRef} // Assign the ref to the container
+      >
         <Document file={story.pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-          <div className="flex justify-center">
-            <Page pageNumber={pageNumber} width={pageWidth} />
-            {numPages !== null && pageNumber + 1 <= numPages && (
-              <Page pageNumber={pageNumber + 1} width={pageWidth} />
-            )}
-          </div>
+          {memoizedPages}
         </Document>
 
         <div className="flex justify-between items-center mt-4">
@@ -74,16 +120,6 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
           </button>
         </div>
       </div>
-
-      {story.audioUrl && (
-        <div className="bg-minecraftBrown p-4 rounded-lg shadow-lg text-center">
-          <h3 className="text-2xl font-minecraft text-white mb-4">Listen to the Story</h3>
-          <audio controls className="w-full">
-            <source src={story.audioUrl} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
     </div>
   );
 };

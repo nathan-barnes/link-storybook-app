@@ -63,6 +63,6 @@ img {
   }
 }
 /* Hide the annotation layer to remove extra white space */
-.react-pdf__Page__annotations {
+/* .react-pdf__Page__annotations {
   display: none;
-}
+} */

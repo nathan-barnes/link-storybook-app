@@ -5,6 +5,9 @@ import StoryList from './components/StoryList';
 import StoryViewer from './components/StoryViewer';
 import { storage } from './firebaseConfig';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
+import 'pdfjs-dist/web/pdf_viewer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 const App: React.FC = () => {
   const [stories, setStories] = useState<Story[]>([]);

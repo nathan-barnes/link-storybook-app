@@ -4,7 +4,7 @@ export interface Story {
     title: string;
     description: string;
     pdfUrl: string;
-    audioUrl?: string;
+    // audioUrl?: string;
     imageUrl: string; // Add imageUrl for the title image
   }
   
