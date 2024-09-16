@@ -4,6 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
+    "site": "link-storybook",
     "public": "public",
     "ignore": [
       "firebase.json",
