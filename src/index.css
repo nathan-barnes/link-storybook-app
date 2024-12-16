@@ -66,3 +66,23 @@ img {
 /* .react-pdf__Page__annotations {
   display: none;
 } */
+
+.react-pdf__Page__textContent {
+  background-color: transparent !important; /* Make the text layer background transparent */
+}
+
+/* Background with a leather texture */
+.react-pdf__Document {
+  background-color: #8B4513; /* Leather-like brown color */
+  background-image: url('./assets/brown-leather-texture-background.jpg'); /* Path to leather texture */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.bg-white {
+  background-color: #8B4513; /* Leather-like brown color */
+  background-image: url('./assets/brown-leather-texture-background.jpg'); /* Path to leather texture */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}

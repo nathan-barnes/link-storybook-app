@@ -15,7 +15,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
 const StoryViewer: React.FC<StoryViewerProps> = ({ story, onBack }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageWidth, setPageWidth] = useState<number>(400);
+  const [pageWidth, setPageWidth] = useState<number>(600);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
